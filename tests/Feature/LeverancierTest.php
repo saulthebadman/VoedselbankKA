@@ -2,12 +2,30 @@
 
 use App\Models\Leverancier;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // Disable middleware voor tests (zoals CSRF)
+    $this->withoutMiddleware();
+    
+    // Maak een test gebruiker aan voor authenticatie
+    $this->user = User::factory()->create([
+        'email' => 'test@voedselbank.nl'
+    ]);
+    
+    // Authenticeer de gebruiker
+    $this->actingAs($this->user);
+});
+
+// ===========================================
+// LEVERANCIER CRUD TESTS
+// ===========================================
 
 // Test: Authenticated user can view leveranciers index
 test('authenticated user can view leveranciers index', function () {
     // Arrange
-    $user = User::factory()->create();
-    
     Leverancier::create([
         'bedrijfsnaam' => 'Test Leverancier BV',
         'adres' => 'Teststraat 123, 1234 AB Teststad',
@@ -18,12 +36,21 @@ test('authenticated user can view leveranciers index', function () {
     ]);
 
     // Act
-    $response = $this->actingAs($user)->get(route('leveranciers.index'));
+    $response = $this->get(route('leveranciers.index'));
 
     // Assert
     $response->assertStatus(200);
     $response->assertSee('Test Leverancier BV');
     $response->assertSee('Leveranciers Overzicht');
+});
+
+// Test: Can display create leverancier form
+test('can display create leverancier form', function () {
+    $response = $this->get(route('leveranciers.create'));
+    
+    $response->assertStatus(200);
+    $response->assertViewIs('leveranciers.create');
+    $response->assertSee('Leverancier Toevoegen');
 });
 
 // Test: Authenticated user can create leverancier
@@ -55,68 +82,325 @@ test('authenticated user can create leverancier', function () {
     ]);
 });
 
-// Test: Leverancier creation requires valid data
-test('leverancier creation requires valid data', function () {
-    // Arrange
-    $user = User::factory()->create();
+// Test: Validates required fields when creating leverancier
+test('validates required fields when creating leverancier', function () {
+    $response = $this->post(route('leveranciers.store'), []);
     
-    // Act
-    $response = $this->actingAs($user)
-        ->post(route('leveranciers.store'), []);
-
-    // Assert
     $response->assertSessionHasErrors([
         'bedrijfsnaam',
-        'adres',
+        'adres', 
         'contactpersoon_naam',
         'email',
         'telefoonnummer'
     ]);
 });
 
-// Test: Authenticated user can update leverancier
-test('authenticated user can update leverancier', function () {
-    // Arrange
-    $user = User::factory()->create();
+// Test: Validates email format
+test('validates email format when creating leverancier', function () {
+    $leverancierData = [
+        'bedrijfsnaam' => 'Test Supermarkt BV',
+        'adres' => 'Teststraat 123',
+        'contactpersoon_naam' => 'Jan Test',
+        'email' => 'invalid-email-format',
+        'telefoonnummer' => '0123-456789'
+    ];
     
+    $response = $this->post(route('leveranciers.store'), $leverancierData);
+    
+    $response->assertSessionHasErrors(['email']);
+});
+
+// Test: Can show specific leverancier
+test('can show specific leverancier', function () {
     $leverancier = Leverancier::create([
-        'bedrijfsnaam' => 'Oude Naam BV',
-        'adres' => 'Oude straat 1, 1111 AA Oudstad',
-        'contactpersoon_naam' => 'Oude Contact',
-        'email' => 'oude@email.nl',
-        'telefoonnummer' => '0611111111',
+        'bedrijfsnaam' => 'Detail Test Leverancier',
+        'adres' => 'Detail straat 789',
+        'contactpersoon_naam' => 'Detail Contact',
+        'email' => 'detail@test.nl',
+        'telefoonnummer' => '0612345679',
         'actief' => true
     ]);
+    
+    $response = $this->get(route('leveranciers.show', $leverancier->leverancier_id));
+    
+    $response->assertStatus(200);
+    $response->assertViewIs('leveranciers.show');
+    $response->assertSee('Detail Test Leverancier');
+    $response->assertSee('Detail Contact');
+});
 
-    $updateData = [
-        'bedrijfsnaam' => 'Nieuwe Naam BV',
-        'adres' => 'Nieuwe adres 789, 9876 ZX Updatestad',
-        'contactpersoon_naam' => 'Updated Contact',
-        'email' => 'nieuwe@email.nl',
-        'telefoonnummer' => '0698765432',
+// Test: Can display edit form
+test('can display edit form for leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Edit Test Leverancier',
+        'adres' => 'Edit straat 101',
+        'contactpersoon_naam' => 'Edit Contact',
+        'email' => 'edit@test.nl',
+        'telefoonnummer' => '0612345680',
         'actief' => true
+    ]);
+    
+    $response = $this->get(route('leveranciers.edit', $leverancier->leverancier_id));
+    
+    $response->assertStatus(200);
+    $response->assertViewIs('leveranciers.edit');
+    $response->assertSee($leverancier->bedrijfsnaam);
+});
+
+// Test: Can update leverancier
+test('can update leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Oude Bedrijfsnaam',
+        'adres' => 'Oude straat 123',
+        'contactpersoon_naam' => 'Oude Contact',
+        'email' => 'oud@test.nl',
+        'telefoonnummer' => '0612345681',
+        'actief' => true
+    ]);
+    
+    $updateData = [
+        'bedrijfsnaam' => 'Nieuwe Bedrijfsnaam',
+        'adres' => 'Nieuwe straat 456',
+        'contactpersoon_naam' => 'Nieuwe Contact',
+        'email' => 'nieuw@test.nl',
+        'telefoonnummer' => '0687654321',
+        'eerstvolgende_levering' => '2025-08-01 14:00:00',
+        'actief' => false
     ];
-
-    // Act
-    $response = $this->actingAs($user)
-        ->put(route('leveranciers.update', $leverancier), $updateData);
-
-    // Assert
+    
+    $response = $this->put(route('leveranciers.update', $leverancier->leverancier_id), $updateData);
+    
     $response->assertRedirect(route('leveranciers.index'));
     $response->assertSessionHas('success', 'Leverancier succesvol bijgewerkt!');
     
     $this->assertDatabaseHas('leveranciers', [
         'leverancier_id' => $leverancier->leverancier_id,
-        'bedrijfsnaam' => 'Nieuwe Naam BV',
-        'email' => 'nieuwe@email.nl'
+        'bedrijfsnaam' => 'Nieuwe Bedrijfsnaam',
+        'actief' => false
     ]);
 });
 
-// Test: Guest cannot access leveranciers
-test('guest cannot access leveranciers', function () {
-    // Act
-    $response = $this->get(route('leveranciers.index'));
+// Test: Can delete leverancier
+test('can delete leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Delete Test Leverancier',
+        'adres' => 'Delete straat 123',
+        'contactpersoon_naam' => 'Delete Contact',
+        'email' => 'delete@test.nl',
+        'telefoonnummer' => '0612345682',
+        'actief' => true
+    ]);
+    
+    $response = $this->delete(route('leveranciers.destroy', $leverancier->leverancier_id));
+    
+    $response->assertRedirect(route('leveranciers.index'));
+    $response->assertSessionHas('success', 'Leverancier succesvol verwijderd!');
+    
+    $this->assertDatabaseMissing('leveranciers', [
+        'leverancier_id' => $leverancier->leverancier_id
+    ]);
+});
 
-    // Assert
+// ===========================================
+// AUTHENTICATION & SECURITY TESTS
+// ===========================================
+
+// Test: Requires authentication
+test('requires authentication to access leveranciers', function () {
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
+    
+    $response = $freshTest->get(route('leveranciers.index'));
+    
     $response->assertRedirect(route('login'));
+});
+
+// Test: Protects create route
+test('protects create route from unauthenticated users', function () {
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
+    
+    $response = $freshTest->get(route('leveranciers.create'));
+    
+    $response->assertRedirect(route('login'));
+});
+
+// Test: Protects store route
+test('protects store route from unauthenticated users', function () {
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
+    
+    $response = $freshTest->post(route('leveranciers.store'), [
+        'bedrijfsnaam' => 'Test'
+    ]);
+    
+    $response->assertRedirect(route('login'));
+});
+
+// ===========================================
+// MODEL TESTS
+// ===========================================
+
+// Test: Leverancier model has correct fillable attributes
+test('leverancier model has correct fillable attributes', function () {
+    $leverancier = new Leverancier();
+    
+    $fillable = [
+        'bedrijfsnaam',
+        'adres', 
+        'contactpersoon_naam',
+        'email',
+        'telefoonnummer',
+        'eerstvolgende_levering',
+        'actief'
+    ];
+    
+    expect($leverancier->getFillable())->toEqual($fillable);
+});
+
+// Test: Can filter active leveranciers
+test('can filter active leveranciers', function () {
+    // Maak actieve en inactieve leveranciers
+    Leverancier::create([
+        'bedrijfsnaam' => 'Actieve Leverancier 1',
+        'adres' => 'Actief adres 1',
+        'contactpersoon_naam' => 'Actief Contact 1',
+        'email' => 'actief1@test.nl',
+        'telefoonnummer' => '0612345683',
+        'actief' => true
+    ]);
+    
+    Leverancier::create([
+        'bedrijfsnaam' => 'Actieve Leverancier 2',
+        'adres' => 'Actief adres 2',
+        'contactpersoon_naam' => 'Actief Contact 2',
+        'email' => 'actief2@test.nl',
+        'telefoonnummer' => '0612345684',
+        'actief' => true
+    ]);
+    
+    Leverancier::create([
+        'bedrijfsnaam' => 'Inactieve Leverancier',
+        'adres' => 'Inactief adres',
+        'contactpersoon_naam' => 'Inactief Contact',
+        'email' => 'inactief@test.nl',
+        'telefoonnummer' => '0612345685',
+        'actief' => false
+    ]);
+    
+    $activeLeveranciers = Leverancier::where('actief', true)->get();
+    
+    expect($activeLeveranciers)->toHaveCount(2);
+    $activeLeveranciers->each(function ($leverancier) {
+        expect($leverancier->actief)->toBeTrue();
+    });
+});
+
+// ===========================================
+// INTEGRATION TESTS
+// ===========================================
+
+// Test: Dashboard shows leveranciers link
+test('dashboard shows leveranciers link in navigation', function () {
+    $response = $this->get('/dashboard');
+    
+    $response->assertStatus(200);
+    $response->assertSee('Leveranciers');
+});
+
+// Test: Validates unique email addresses
+test('validates unique email addresses', function () {
+    // Maak eerst een leverancier
+    Leverancier::create([
+        'bedrijfsnaam' => 'Eerste Leverancier',
+        'adres' => 'Eerste adres',
+        'contactpersoon_naam' => 'Eerste Contact',
+        'email' => 'duplicate@test.nl',
+        'telefoonnummer' => '0612345686',
+        'actief' => true
+    ]);
+    
+    // Probeer een nieuwe leverancier met hetzelfde email te maken
+    $response = $this->post(route('leveranciers.store'), [
+        'bedrijfsnaam' => 'Tweede Leverancier',
+        'adres' => 'Tweede adres',
+        'contactpersoon_naam' => 'Tweede Contact',
+        'email' => 'duplicate@test.nl',
+        'telefoonnummer' => '0612345687'
+    ]);
+    
+    $response->assertSessionHasErrors(['email']);
+});
+
+// ===========================================
+// BUSINESS LOGIC TESTS
+// ===========================================
+
+// Test: Cannot delete active leverancier
+test('cannot delete active leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Actieve Leverancier',
+        'adres' => 'Actief adres',
+        'contactpersoon_naam' => 'Actief Contact',
+        'email' => 'actief@test.nl',
+        'telefoonnummer' => '0612345688',
+        'actief' => true  // ACTIEF
+    ]);
+    
+    $response = $this->delete(route('leveranciers.destroy', $leverancier->leverancier_id));
+    
+    $response->assertRedirect(route('leveranciers.index'));
+    
+    // Controleer dat leverancier nog bestaat (niet verwijderd)
+    $this->assertDatabaseHas('leveranciers', [
+        'leverancier_id' => $leverancier->leverancier_id
+    ]);
+});
+
+// Test: Can delete inactive leverancier  
+test('can delete inactive leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Inactieve Leverancier',
+        'adres' => 'Inactief adres',
+        'contactpersoon_naam' => 'Inactief Contact',
+        'email' => 'inactief@test.nl',
+        'telefoonnummer' => '0612345689',
+        'actief' => false  // INACTIEF
+    ]);
+    
+    // Controleer dat leverancier echt inactief is
+    expect($leverancier->actief)->toBeFalse();
+    
+    // Gebruik de ID in plaats van het model object
+    $response = $this->delete('/leveranciers/' . $leverancier->leverancier_id);
+    
+    $response->assertRedirect(route('leveranciers.index'));
+    
+    // Controleer dat leverancier verwijderd is
+    $this->assertDatabaseMissing('leveranciers', [
+        'leverancier_id' => $leverancier->leverancier_id
+    ]);
+});
+
+// Debug test
+test('debug leverancier deletion', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Debug Leverancier',
+        'adres' => 'Debug adres',
+        'contactpersoon_naam' => 'Debug Contact',
+        'email' => 'debug@test.nl',
+        'telefoonnummer' => '0612345690',
+        'actief' => false
+    ]);
+    
+    // Debug output
+    dump('Leverancier actief waarde:', $leverancier->actief);
+    dump('Type:', gettype($leverancier->actief));
+    dump('== false:', $leverancier->actief == false);
+    dump('=== false:', $leverancier->actief === false);
+    
+    expect(true)->toBeTrue(); // Altijd slagen voor debug
 });

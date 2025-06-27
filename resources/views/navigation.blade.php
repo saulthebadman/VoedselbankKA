@@ -1,27 +1,28 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\LeverancierController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\KlantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Leverancier routes
-    Route::resource('leveranciers', LeverancierController::class);
-    
-    // Klant routes (van teamgenoot)
-    Route::resource('klant', KlantController::class);
 });
 
 require __DIR__.'/auth.php';
+?>
+<nav>
+    <!-- ...bestaande links... -->
+    <a href="{{ route('klanten.index') }}" class="{{ request()->routeIs('klanten.index') ? 'active' : '' }}">
+        Klanten
+    </a>
+    <!-- ...bestaande links... -->
+</nav>
