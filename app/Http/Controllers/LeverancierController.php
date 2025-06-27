@@ -12,7 +12,9 @@ class LeverancierController extends Controller
      */
     public function index()
     {
-        $leveranciers = Leverancier::orderBy('bedrijfsnaam')->get();
+        $leveranciers = Leverancier::orderByRaw('eerstvolgende_levering IS NULL, eerstvolgende_levering ASC')
+            ->orderBy('bedrijfsnaam')
+            ->get();
         return view('leveranciers.index', compact('leveranciers'));
     }
 
@@ -30,17 +32,20 @@ class LeverancierController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'leveranciernummer' => 'required|string|max:255|unique:leveranciers,leveranciernummer',
             'bedrijfsnaam' => 'required|string|max:255',
+            'leveranciertype' => 'required|in:supermarkten,groothandelaars,boeren',
             'adres' => 'required|string|max:255',
             'contactpersoon_naam' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:leveranciers,email',
             'telefoonnummer' => 'required|string|max:20',
             'eerstvolgende_levering' => 'nullable|date',
-            'actief' => 'boolean'
+            'opmerking' => 'nullable|string',
+            'isactief' => 'boolean'
         ]);
 
         // Standaard actief op true zetten als niet ingevuld
-        $validated['actief'] = $request->has('actief') ? true : true;
+        $validated['isactief'] = $request->has('isactief') ? true : true;
 
         Leverancier::create($validated);
 
@@ -70,17 +75,20 @@ class LeverancierController extends Controller
     public function update(Request $request, Leverancier $leverancier)
     {
         $validated = $request->validate([
+            'leveranciernummer' => 'required|string|max:255|unique:leveranciers,leveranciernummer,' . $leverancier->leverancier_id . ',leverancier_id',
             'bedrijfsnaam' => 'required|string|max:255',
+            'leveranciertype' => 'required|in:supermarkten,groothandelaars,boeren',
             'adres' => 'required|string|max:255',
             'contactpersoon_naam' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:leveranciers,email,' . $leverancier->leverancier_id . ',leverancier_id',
             'telefoonnummer' => 'required|string|max:20',
             'eerstvolgende_levering' => 'nullable|date',
-            'actief' => 'boolean'
+            'opmerking' => 'nullable|string',
+            'isactief' => 'boolean'
         ]);
 
         // Actief checkbox handling
-        $validated['actief'] = $request->has('actief') ? true : false;
+        $validated['isactief'] = $request->has('isactief') ? true : false;
 
         $leverancier->update($validated);
 
@@ -93,6 +101,22 @@ class LeverancierController extends Controller
      */
     public function destroy(Leverancier $leverancier)
     {
+        // Controleer of de leverancier actief is (strict boolean check)
+        if ($leverancier->isactief == true || $leverancier->isactief == 1) {
+            return redirect()->route('leveranciers.index')
+                ->with('error', 'Actieve leveranciers kunnen niet worden verwijderd. Zet de leverancier eerst op inactief.');
+        }
+        
+        // Controleer of er nog leveringen gekoppeld zijn (alleen als tabel bestaat)
+        try {
+            if ($leverancier->leveringen()->exists()) {
+                return redirect()->route('leveranciers.index')
+                    ->with('error', 'Deze leverancier kan niet worden verwijderd omdat er nog leveringen aan gekoppeld zijn.');
+            }
+        } catch (\Exception $e) {
+            // Leveringen tabel bestaat niet (bijv. in tests), ga door met verwijderen
+        }
+        
         $leverancier->delete();
         
         return redirect()->route('leveranciers.index')

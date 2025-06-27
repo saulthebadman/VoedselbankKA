@@ -334,3 +334,73 @@ test('validates unique email addresses', function () {
     
     $response->assertSessionHasErrors(['email']);
 });
+
+// ===========================================
+// BUSINESS LOGIC TESTS
+// ===========================================
+
+// Test: Cannot delete active leverancier
+test('cannot delete active leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Actieve Leverancier',
+        'adres' => 'Actief adres',
+        'contactpersoon_naam' => 'Actief Contact',
+        'email' => 'actief@test.nl',
+        'telefoonnummer' => '0612345688',
+        'actief' => true  // ACTIEF
+    ]);
+    
+    $response = $this->delete(route('leveranciers.destroy', $leverancier->leverancier_id));
+    
+    $response->assertRedirect(route('leveranciers.index'));
+    
+    // Controleer dat leverancier nog bestaat (niet verwijderd)
+    $this->assertDatabaseHas('leveranciers', [
+        'leverancier_id' => $leverancier->leverancier_id
+    ]);
+});
+
+// Test: Can delete inactive leverancier  
+test('can delete inactive leverancier', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Inactieve Leverancier',
+        'adres' => 'Inactief adres',
+        'contactpersoon_naam' => 'Inactief Contact',
+        'email' => 'inactief@test.nl',
+        'telefoonnummer' => '0612345689',
+        'actief' => false  // INACTIEF
+    ]);
+    
+    // Controleer dat leverancier echt inactief is
+    expect($leverancier->actief)->toBeFalse();
+    
+    // Gebruik de ID in plaats van het model object
+    $response = $this->delete('/leveranciers/' . $leverancier->leverancier_id);
+    
+    $response->assertRedirect(route('leveranciers.index'));
+    
+    // Controleer dat leverancier verwijderd is
+    $this->assertDatabaseMissing('leveranciers', [
+        'leverancier_id' => $leverancier->leverancier_id
+    ]);
+});
+
+// Debug test
+test('debug leverancier deletion', function () {
+    $leverancier = Leverancier::create([
+        'bedrijfsnaam' => 'Debug Leverancier',
+        'adres' => 'Debug adres',
+        'contactpersoon_naam' => 'Debug Contact',
+        'email' => 'debug@test.nl',
+        'telefoonnummer' => '0612345690',
+        'actief' => false
+    ]);
+    
+    // Debug output
+    dump('Leverancier actief waarde:', $leverancier->actief);
+    dump('Type:', gettype($leverancier->actief));
+    dump('== false:', $leverancier->actief == false);
+    dump('=== false:', $leverancier->actief === false);
+    
+    expect(true)->toBeTrue(); // Altijd slagen voor debug
+});

@@ -17,8 +17,14 @@
                 <div class="p-6 text-gray-900">
                     
                     @if(session('success'))
-                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        <div class="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
                             {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {{ session('error') }}
                         </div>
                     @endif
 
@@ -28,10 +34,13 @@
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Leveranciernummer
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Bedrijfsnaam
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Adres
+                                            Type
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Contactpersoon
@@ -54,10 +63,18 @@
                                     @foreach($leveranciers as $leverancier)
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {{ $leverancier->leveranciernummer }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {{ $leverancier->bedrijfsnaam }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $leverancier->adres }}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                    @if($leverancier->leveranciertype == 'supermarkten') bg-blue-100 text-blue-800
+                                                    @elseif($leverancier->leveranciertype == 'groothandelaars') bg-purple-100 text-purple-800
+                                                    @else bg-green-100 text-green-800 @endif">
+                                                    {{ \App\Models\Leverancier::LEVERANCIERTYPE_OPTIONS[$leverancier->leveranciertype] ?? $leverancier->leveranciertype }}
+                                                </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $leverancier->contactpersoon_naam }}<br>
@@ -77,7 +94,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                @if($leverancier->actief)
+                                                @if($leverancier->isactief)
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Actief
                                                     </span>
@@ -93,17 +110,25 @@
                                                        class="text-blue-600 hover:text-blue-900">Bekijken</a>
                                                     <a href="{{ route('leveranciers.edit', $leverancier) }}" 
                                                        class="text-yellow-600 hover:text-yellow-900">Bewerken</a>
-                                                    <form action="{{ route('leveranciers.destroy', $leverancier) }}" 
-                                                          method="POST" 
-                                                          class="inline-block"
-                                                          onsubmit="return confirm('Weet je zeker dat je deze leverancier wilt verwijderen?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" 
-                                                                class="text-red-600 hover:text-red-900">
+                                                    
+                                                    @if($leverancier->isactief)
+                                                        <span class="text-gray-400 cursor-not-allowed" 
+                                                              title="Actieve leveranciers kunnen niet worden verwijderd">
                                                             Verwijderen
-                                                        </button>
-                                                    </form>
+                                                        </span>
+                                                    @else
+                                                        <form action="{{ route('leveranciers.destroy', $leverancier) }}" 
+                                                              method="POST" 
+                                                              class="inline-block"
+                                                              onsubmit="return confirm('Weet je zeker dat je deze leverancier wilt verwijderen?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" 
+                                                                    class="text-red-600 hover:text-red-900">
+                                                                Verwijderen
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

@@ -31,8 +31,25 @@
                             </h3>
                             
                             <div>
+                                <label class="block text-sm font-medium text-gray-500">Leveranciernummer</label>
+                                <p class="mt-1 text-sm text-gray-900 font-mono">{{ $leverancier->leveranciernummer }}</p>
+                            </div>
+                            
+                            <div>
                                 <label class="block text-sm font-medium text-gray-500">Bedrijfsnaam</label>
                                 <p class="mt-1 text-sm text-gray-900">{{ $leverancier->bedrijfsnaam }}</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Leveranciertype</label>
+                                <p class="mt-1 text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        @if($leverancier->leveranciertype == 'supermarkten') bg-blue-100 text-blue-800
+                                        @elseif($leverancier->leveranciertype == 'groothandelaars') bg-purple-100 text-purple-800
+                                        @else bg-green-100 text-green-800 @endif">
+                                        {{ \App\Models\Leverancier::LEVERANCIERTYPE_OPTIONS[$leverancier->leveranciertype] ?? $leverancier->leveranciertype }}
+                                    </span>
+                                </p>
                             </div>
                             
                             <div>
@@ -67,7 +84,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-500">Status</label>
                                 <p class="mt-1 text-sm text-gray-900">
-                                    @if($leverancier->actief)
+                                    @if($leverancier->isactief)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             Actief
                                         </span>
@@ -78,6 +95,13 @@
                                     @endif
                                 </p>
                             </div>
+
+                            @if($leverancier->opmerking)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Opmerking</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ $leverancier->opmerking }}</p>
+                            </div>
+                            @endif
                         </div>
                         
                         <!-- Contactinformatie -->
@@ -118,11 +142,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
                             <div>
                                 <span class="font-medium">Toegevoegd op:</span>
-                                {{ $leverancier->created_at->format('d-m-Y \o\m H:i') }}
+                                @if($leverancier->datum_aangemaakt)
+                                    {{ $leverancier->datum_aangemaakt->format('d-m-Y \o\m H:i') }}
+                                @else
+                                    Onbekend
+                                @endif
                             </div>
                             <div>
                                 <span class="font-medium">Laatst bijgewerkt:</span>
-                                {{ $leverancier->updated_at->format('d-m-Y \o\m H:i') }}
+                                @if($leverancier->datum_gewijzigd)
+                                    {{ $leverancier->datum_gewijzigd->format('d-m-Y \o\m H:i') }}
+                                @else
+                                    Onbekend
+                                @endif
                             </div>
                         </div>
                     </div>
