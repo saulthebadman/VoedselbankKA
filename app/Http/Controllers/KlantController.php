@@ -82,11 +82,14 @@ class KlantController extends Controller
             'aantal_volwassenen' => 'required|integer|min:1',
             'aantal_kinderen' => 'required|integer|min:0',
             'aantal_babies' => 'required|integer|min:0',
-            'actief' => 'required|boolean',
         ]);
+        
+        // Handle checkbox: if not checked, it won't be in the request
+        $data['actief'] = $request->has('actief') ? true : false;
         $data['gezinsnaam'] = 'Familie ' . $data['achternaam'];
+        
         $klant->update($data);
-        return redirect()->route('klant.index')->with('success', 'Klant bijgewerkt!');
+        return redirect()->route('klant.index')->with('success_edit', 'Klant bijgewerkt!');
     }
 
     /**
@@ -94,10 +97,10 @@ class KlantController extends Controller
      */
     public function destroy(Klant $klant)
     {
-        if (!$klant->actief) {
-            return redirect()->route('klant.index')->with('success', 'Inactieve klanten kunnen niet worden verwijderd.');
+        if ($klant->actief) {
+            return redirect()->route('klant.index')->with('error', 'Actieve klanten kunnen niet worden verwijderd.');
         }
         $klant->delete();
-        return redirect()->route('klant.index')->with('success', 'Klant verwijderd!');
+        return redirect()->route('klant.index')->with('success_delete', 'Klant verwijderd!');
     }
 }

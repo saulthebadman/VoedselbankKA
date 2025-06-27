@@ -24,9 +24,6 @@
                                    value="{{ old('leveranciernummer') }}"
                                    placeholder="bijv. SUP001, BOE001, GRO001"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('leveranciernummer')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
                         
                         <!-- Bedrijfsnaam -->
@@ -39,9 +36,6 @@
                                    id="bedrijfsnaam" 
                                    value="{{ old('bedrijfsnaam') }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('bedrijfsnaam')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Leveranciertype -->
@@ -59,9 +53,6 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('leveranciertype')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Adres -->
@@ -75,9 +66,6 @@
                                    value="{{ old('adres') }}"
                                    placeholder="Straat huisnummer, postcode plaats"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('adres')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Contactpersoon -->
@@ -90,9 +78,6 @@
                                    id="contactpersoon_naam" 
                                    value="{{ old('contactpersoon_naam') }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('contactpersoon_naam')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div>
@@ -104,9 +89,6 @@
                                    id="email" 
                                    value="{{ old('email') }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('email')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div>
@@ -118,9 +100,6 @@
                                    id="telefoonnummer" 
                                    value="{{ old('telefoonnummer') }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('telefoonnummer')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Eerstvolgende levering -->
@@ -133,9 +112,6 @@
                                    id="eerstvolgende_levering" 
                                    value="{{ old('eerstvolgende_levering') }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('eerstvolgende_levering')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Opmerking -->
@@ -148,9 +124,6 @@
                                       rows="3"
                                       placeholder="Eventuele opmerkingen over deze leverancier..."
                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('opmerking') }}</textarea>
-                            @error('opmerking')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- Actief checkbox -->
