@@ -207,28 +207,33 @@ test('can delete leverancier', function () {
 
 // Test: Requires authentication
 test('requires authentication to access leveranciers', function () {
-    // Log de gebruiker uit
-    auth()->logout();
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
     
-    $response = $this->get(route('leveranciers.index'));
+    $response = $freshTest->get(route('leveranciers.index'));
     
     $response->assertRedirect(route('login'));
 });
 
 // Test: Protects create route
 test('protects create route from unauthenticated users', function () {
-    auth()->logout();
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
     
-    $response = $this->get(route('leveranciers.create'));
+    $response = $freshTest->get(route('leveranciers.create'));
     
     $response->assertRedirect(route('login'));
 });
 
 // Test: Protects store route
 test('protects store route from unauthenticated users', function () {
-    auth()->logout();
+    // Maak een nieuwe test instantie zonder middleware
+    $freshTest = new \Tests\TestCase();
+    $freshTest->setUp();
     
-    $response = $this->post(route('leveranciers.store'), [
+    $response = $freshTest->post(route('leveranciers.store'), [
         'bedrijfsnaam' => 'Test'
     ]);
     

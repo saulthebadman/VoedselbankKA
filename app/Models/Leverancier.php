@@ -12,6 +12,14 @@ class Leverancier extends Model
     protected $table = 'leveranciers';
     protected $primaryKey = 'leverancier_id';
     
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'leverancier_id';
+    }
+    
     protected $fillable = [
         'bedrijfsnaam',
         'adres',
