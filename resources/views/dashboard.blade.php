@@ -94,9 +94,10 @@
                             </div>
                         </div>
                         <div class="mt-5">
-                            <button class="w-full bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
-                                Binnenkort beschikbaar
-                            </button>
+                            <a href="{{ route('klant.index') }}" 
+                               class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                Ga naar Klanten
+                            </a>
                         </div>
                     </div>
                 </div>

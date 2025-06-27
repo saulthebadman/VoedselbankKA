@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LeverancierController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KlantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,6 +19,9 @@ Route::middleware('auth')->group(function () {
     
     // Leverancier routes
     Route::resource('leveranciers', LeverancierController::class);
+    
+    // Klant routes (van teamgenoot)
+    Route::resource('klant', KlantController::class);
 });
 
 require __DIR__.'/auth.php';
