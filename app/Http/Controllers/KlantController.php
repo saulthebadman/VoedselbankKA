@@ -41,12 +41,14 @@ class KlantController extends Controller
             'aantal_volwassenen' => 'required|integer|min:1',
             'aantal_kinderen' => 'required|integer|min:0',
             'aantal_babies' => 'required|integer|min:0',
-            'actief' => 'required|boolean',
         ]);
+        
+        // Handle checkbox: if not checked, it won't be in the request
+        $data['actief'] = $request->has('actief') ? true : false;
         $data['gezinsnaam'] = 'Familie ' . $data['achternaam'];
         $data['aanmelddatum'] = now();
         $klant = \App\Models\Klant::create($data);
-        return redirect()->route('klant.index')->with('success', 'Klant aangemaakt!');
+        return redirect()->route('klant.index')->with('success_create', 'Klant aangemaakt!');
     }
 
     /**

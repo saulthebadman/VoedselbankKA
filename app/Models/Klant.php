@@ -13,6 +13,27 @@ class Klant extends Model
     protected $primaryKey = 'klant_id';
     public $timestamps = true;
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'klant_id';
+    }
+
+    /**
+     * Get the value of the model's route key.
+     */
+    public function getRouteKey()
+    {
+        return $this->getAttribute($this->getRouteKeyName());
+    }
+
+    protected $casts = [
+        'actief' => 'boolean',
+        'aanmelddatum' => 'datetime',
+    ];
+
     protected $fillable = [
         'gezinsnaam',
         'voornaam',
