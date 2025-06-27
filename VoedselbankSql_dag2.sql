@@ -1,6 +1,10 @@
 -- VoedselbankSql_dag2.sql
--- Database script voor Voedselbank Maaskantje
+-- Database script voor Voedselbank Maaskantje (MySQL/PhpMyAdmin)
 -- Datum: 27-06-2025
+
+-- Database aanmaken
+CREATE DATABASE IF NOT EXISTS voedselbank_maaskantje CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE voedselbank_maaskantje;
 
 -- Drop tables if they exist (in reverse order due to foreign keys)
 DROP TABLE IF EXISTS leveringsdetails;
@@ -11,65 +15,65 @@ DROP TABLE IF EXISTS leveranciers;
 
 -- Tabel: leveranciers
 CREATE TABLE leveranciers (
-    leverancier_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    leverancier_id INT AUTO_INCREMENT PRIMARY KEY,
     bedrijfsnaam VARCHAR(255) NOT NULL,
     adres VARCHAR(255) NOT NULL,
     contactpersoon_naam VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     telefoonnummer VARCHAR(20) NOT NULL,
-    eerstvolgende_levering TIMESTAMP NULL,
-    actief BOOLEAN DEFAULT 1,
+    eerstvolgende_levering DATETIME NULL,
+    actief BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
 -- Tabel: productcategorieen
 CREATE TABLE productcategorieen (
-    categorie_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    categorie_id INT AUTO_INCREMENT PRIMARY KEY,
     omschrijving VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
 -- Tabel: producten
 CREATE TABLE producten (
-    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
     naam VARCHAR(255) NOT NULL,
     streepjescode VARCHAR(255) UNIQUE NOT NULL,
-    aantal_in_voorraad INTEGER DEFAULT 0,
+    aantal_in_voorraad INT DEFAULT 0,
     houdbaar_tot DATE NULL,
-    categorie_id INTEGER NOT NULL,
-    leverancier_id INTEGER NOT NULL,
+    categorie_id INT NOT NULL,
+    leverancier_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (categorie_id) REFERENCES productcategorieen(categorie_id),
-    FOREIGN KEY (leverancier_id) REFERENCES leveranciers(leverancier_id)
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (categorie_id) REFERENCES productcategorieen(categorie_id) ON DELETE RESTRICT,
+    FOREIGN KEY (leverancier_id) REFERENCES leveranciers(leverancier_id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
 
 -- Tabel: leveringen
 CREATE TABLE leveringen (
-    levering_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    leverancier_id INTEGER NOT NULL,
+    levering_id INT AUTO_INCREMENT PRIMARY KEY,
+    leverancier_id INT NOT NULL,
     leveringsdatum DATE NOT NULL,
-    status VARCHAR(20) DEFAULT 'gepland' CHECK (status IN ('gepland', 'onderweg', 'geleverd', 'geannuleerd')),
+    status ENUM('gepland', 'onderweg', 'geleverd', 'geannuleerd') DEFAULT 'gepland',
     opmerkingen TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (leverancier_id) REFERENCES leveranciers(leverancier_id)
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (leverancier_id) REFERENCES leveranciers(leverancier_id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
 
 -- Tabel: leveringsdetails
 CREATE TABLE leveringsdetails (
-    levering_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    aantal_geleverd INTEGER NOT NULL,
+    levering_id INT NOT NULL,
+    product_id INT NOT NULL,
+    aantal_geleverd INT NOT NULL,
     vervaldatum DATE NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (levering_id, product_id),
-    FOREIGN KEY (levering_id) REFERENCES leveringen(levering_id),
-    FOREIGN KEY (product_id) REFERENCES producten(product_id)
-);
+    FOREIGN KEY (levering_id) REFERENCES leveringen(levering_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES producten(product_id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
 
 -- Insert test data - minimaal 5 records per tabel zoals gevraagd
 

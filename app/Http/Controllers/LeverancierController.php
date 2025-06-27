@@ -33,7 +33,7 @@ class LeverancierController extends Controller
             'bedrijfsnaam' => 'required|string|max:255',
             'adres' => 'required|string|max:255',
             'contactpersoon_naam' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:leveranciers,email',
             'telefoonnummer' => 'required|string|max:20',
             'eerstvolgende_levering' => 'nullable|date',
             'actief' => 'boolean'
@@ -73,7 +73,7 @@ class LeverancierController extends Controller
             'bedrijfsnaam' => 'required|string|max:255',
             'adres' => 'required|string|max:255',
             'contactpersoon_naam' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:leveranciers,email,' . $leverancier->leverancier_id . ',leverancier_id',
             'telefoonnummer' => 'required|string|max:20',
             'eerstvolgende_levering' => 'nullable|date',
             'actief' => 'boolean'
