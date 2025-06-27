@@ -176,8 +176,9 @@
                                 Annuleren
                             </a>
                             <button type="submit" 
+                                    id="submitBtn"
                                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Bijwerken
+                                📝 Leverancier Bijwerken
                             </button>
                         </div>
                     </form>
@@ -185,4 +186,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function(e) {
+                submitBtn.innerHTML = '⏳ Bijwerken...';
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('hover:bg-blue-700');
+                submitBtn.classList.add('bg-blue-400');
+            });
+        });
+    </script>
 </x-app-layout>

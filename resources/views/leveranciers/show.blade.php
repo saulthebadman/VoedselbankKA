@@ -6,12 +6,12 @@
             </h2>
             <div class="flex space-x-2">
                 <a href="{{ route('leveranciers.edit', $leverancier) }}" 
-                   class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                    Bewerken
+                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    📝 Bewerken
                 </a>
                 <a href="{{ route('leveranciers.index') }}" 
                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                    Terug naar Overzicht
+                    ← Terug naar Overzicht
                 </a>
             </div>
         </div>

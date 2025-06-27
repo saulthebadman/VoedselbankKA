@@ -50,7 +50,7 @@ class LeverancierController extends Controller
         Leverancier::create($validated);
 
         return redirect()->route('leveranciers.index')
-            ->with('success', 'Leverancier succesvol toegevoegd!');
+            ->with('success_create', 'Leverancier succesvol toegevoegd!');
     }
 
     /**
@@ -93,7 +93,7 @@ class LeverancierController extends Controller
         $leverancier->update($validated);
 
         return redirect()->route('leveranciers.index')
-            ->with('success', 'Leverancier succesvol bijgewerkt!');
+            ->with('success_edit', 'Leverancier succesvol bijgewerkt!');
     }
 
     /**
@@ -120,6 +120,6 @@ class LeverancierController extends Controller
         $leverancier->delete();
         
         return redirect()->route('leveranciers.index')
-            ->with('success', 'Leverancier succesvol verwijderd!');
+            ->with('success_delete', 'Leverancier succesvol verwijderd!');
     }
 }

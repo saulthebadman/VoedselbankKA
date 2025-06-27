@@ -175,8 +175,9 @@
                                 Annuleren
                             </a>
                             <button type="submit" 
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Opslaan
+                                    id="submitBtn"
+                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                ✓ Leverancier Toevoegen
                             </button>
                         </div>
                     </form>
@@ -184,4 +185,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function(e) {
+                submitBtn.innerHTML = '⏳ Toevoegen...';
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('hover:bg-green-700');
+                submitBtn.classList.add('bg-green-400');
+            });
+        });
+    </script>
 </x-app-layout>
