@@ -15,6 +15,40 @@
                 </div>
             </div>
 
+            <!-- Eerstvolgende Levering -->
+            @if($eerstvolgendeLevering)
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">🚚 Eerstvolgende Levering</h3>
+                            <p class="text-blue-100 mb-3">
+                                <strong>{{ $eerstvolgendeLevering->bedrijfsnaam }}</strong><br>
+                                {{ $eerstvolgendeLevering->eerstvolgende_levering->format('d-m-Y \o\m H:i') }}
+                            </p>
+                            <p class="text-sm text-blue-100">
+                                Contactpersoon: {{ $eerstvolgendeLevering->contactpersoon_naam }}<br>
+                                Telefoon: {{ $eerstvolgendeLevering->telefoonnummer }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <a href="{{ route('leveranciers.show', $eerstvolgendeLevering->leverancier_id) }}" 
+                               class="bg-white text-blue-600 hover:bg-blue-50 font-bold py-3 px-6 rounded-lg transition duration-200 inline-block">
+                                Bekijk Details →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @else
+            <div class="bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 text-gray-700">
+                    <h3 class="text-lg font-semibold mb-2">📅 Geen geplande leveringen</h3>
+                    <p class="text-gray-600">Er zijn momenteel geen leveringen gepland. Plan een nieuwe levering via leveranciers beheer.</p>
+                </div>
+            </div>
+            @endif
+
             <!-- Snelle acties -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 
@@ -60,9 +94,10 @@
                             </div>
                         </div>
                         <div class="mt-5">
-                            <button class="w-full bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
-                                Binnenkort beschikbaar
-                            </button>
+                            <a href="{{ route('klant.index') }}" 
+                               class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                Ga naar Klanten
+                            </a>
                         </div>
                     </div>
                 </div>

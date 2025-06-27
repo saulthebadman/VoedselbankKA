@@ -21,18 +21,34 @@ class Leverancier extends Model
     }
     
     protected $fillable = [
+        'leveranciernummer',
         'bedrijfsnaam',
         'adres',
         'contactpersoon_naam',
         'email',
         'telefoonnummer',
+        'leveranciertype',
+        'opmerking',
         'eerstvolgende_levering',
-        'actief'
+        'isactief'
     ];
 
     protected $casts = [
         'eerstvolgende_levering' => 'datetime',
-        'actief' => 'boolean'
+        'isactief' => 'boolean',
+        'datum_aangemaakt' => 'datetime',
+        'datum_gewijzigd' => 'datetime'
+    ];
+
+    // Custom timestamps columns
+    const CREATED_AT = 'datum_aangemaakt';
+    const UPDATED_AT = 'datum_gewijzigd';
+
+    // Leveranciertype opties volgens docent eisen
+    const LEVERANCIERTYPE_OPTIONS = [
+        'supermarkten' => 'Supermarkten',
+        'groothandelaars' => 'Groothandelaars', 
+        'boeren' => 'Boeren'
     ];
 
     // Relaties

@@ -9,8 +9,24 @@ class Klant extends Model
 {
     use HasFactory;
 
+    protected $table = 'klanten';
+    protected $primaryKey = 'klant_id';
+    public $timestamps = true;
+
     protected $fillable = [
-        'naam',
+        'gezinsnaam',
+        'voornaam',
+        'achternaam',
+        'straat',
+        'huisnummer',
+        'postcode',
+        'plaats',
+        'telefoonnummer',
         'email',
+        'aantal_volwassenen',
+        'aantal_kinderen',
+        'aantal_babies',
+        'actief',
+        'aanmelddatum',
     ];
 }

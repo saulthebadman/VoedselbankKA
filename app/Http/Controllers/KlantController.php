@@ -7,76 +7,97 @@ use Illuminate\Http\Request;
 
 class KlantController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $klanten = Klant::all();
-        return view('klanten.index', compact('klanten'));
+        $klanten = \App\Models\Klant::orderBy('klant_id', 'desc')->get();
+        return view('klant.index', compact('klanten'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        return view('klanten.create');
+        return view('klant.create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'naam' => 'required|string|max:255',
-            'email' => 'required|email|unique:klants,email',
-            'wachtwoord' => 'required|string|min:8',
-            'allergie' => 'nullable|string|max:255',
+        $data = $request->validate([
+            'voornaam' => 'required',
+            'achternaam' => 'required',
+            'straat' => 'required',
+            'huisnummer' => 'required',
+            'postcode' => 'required',
+            'plaats' => 'required',
+            'telefoonnummer' => 'required',
+            'email' => 'nullable|email',
+            'aantal_volwassenen' => 'required|integer|min:1',
+            'aantal_kinderen' => 'required|integer|min:0',
+            'aantal_babies' => 'required|integer|min:0',
+            'actief' => 'required|boolean',
         ]);
-
-        // Sla het wachtwoord veilig op (hashen)
-        $validated['wachtwoord'] = bcrypt($validated['wachtwoord']);
-
-        Klant::create($validated);
-
-        return redirect()->route('klanten.index')->with('success', 'Klant succesvol toegevoegd.');
+        $data['gezinsnaam'] = 'Familie ' . $data['achternaam'];
+        $data['aanmelddatum'] = now();
+        $klant = \App\Models\Klant::create($data);
+        return redirect()->route('klant.index')->with('success', 'Klant aangemaakt!');
     }
 
-    public function edit($id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(Klant $klant)
     {
-        $klant = \App\Models\Klant::findOrFail($id);
-        return view('klanten.edit', compact('klant'));
+        return view('klant.show', compact('klant'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Klant $klant)
     {
-        $klant = \App\Models\Klant::findOrFail($id);
+        return view('klant.edit', compact('klant'));
+    }
 
-        $validated = $request->validate([
-            'naam' => 'required|string|max:255',
-            'email' => 'required|email|unique:klants,email,' . $klant->id,
-            'telefoon' => 'nullable|string|max:255',
-            'allergie' => 'nullable|string|max:255',
-            'nummer' => 'nullable|string|max:255',
-            // voeg hier andere velden toe indien nodig
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Klant $klant)
+    {
+        $data = $request->validate([
+            'voornaam' => 'required',
+            'achternaam' => 'required',
+            'straat' => 'required',
+            'huisnummer' => 'required',
+            'postcode' => 'required',
+            'plaats' => 'required',
+            'telefoonnummer' => 'required',
+            'email' => 'nullable|email',
+            'aantal_volwassenen' => 'required|integer|min:1',
+            'aantal_kinderen' => 'required|integer|min:0',
+            'aantal_babies' => 'required|integer|min:0',
+            'actief' => 'required|boolean',
         ]);
-
-        $klant->update($validated);
-
-        // Na opslaan: terug naar het overzicht, nieuwe gegevens direct zichtbaar
-        return redirect()->route('klanten.index')->with('success', 'Klant succesvol bijgewerkt.');
+        $data['gezinsnaam'] = 'Familie ' . $data['achternaam'];
+        $klant->update($data);
+        return redirect()->route('klant.index')->with('success', 'Klant bijgewerkt!');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Klant $klant)
     {
-        $klant = \App\Models\Klant::findOrFail($id);
-        $klant->delete();
-
-        return redirect()->route('klanten.index')->with('success', 'Klant succesvol verwijderd.');
-    }
-
-    public function show($id)
-    {
-        $klant = \App\Models\Klant::find($id);
-
-        if (!$klant) {
-            return view('klanten.show', ['klant' => null]);
+        if (!$klant->actief) {
+            return redirect()->route('klant.index')->with('success', 'Inactieve klanten kunnen niet worden verwijderd.');
         }
-
-        return view('klanten.show', compact('klant'));
+        $klant->delete();
+        return redirect()->route('klant.index')->with('success', 'Klant verwijderd!');
     }
 }
-
